@@ -1,4 +1,3 @@
 HTMLViewCap
 ===========
-
-A HTMLView Cap
+Web网页自动化截图软件。
