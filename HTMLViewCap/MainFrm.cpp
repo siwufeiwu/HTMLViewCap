@@ -6,6 +6,7 @@
 #include "HTMLViewCap.h"
 
 #include "MainFrm.h"
+#include "HTMLImage.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -36,7 +37,7 @@ static UINT indicators[] =
 
 // CMainFrame 构造/析构
 
-CMainFrame::CMainFrame()
+CMainFrame::CMainFrame() 
 {
 	// TODO: 在此添加成员初始化代码
 }
@@ -97,7 +98,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockPane(&m_wndMenuBar);
 	DockPane(&m_wndToolBar);
 
-
 	// 启用 Visual Studio 2005 样式停靠窗口行为
 	CDockingManager::SetDockingMode(DT_SMART);
 	// 启用 Visual Studio 2005 样式停靠窗口自动隐藏行为
@@ -138,6 +138,27 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CMFCToolBar::SetBasicCommands(lstBasicCommands);
 
+	// 设置 位置和大小
+	POINT p = {0, 0};
+	SIZE  s = {300, 800};
+	CRect rectPos(p, s);
+
+	// 
+	if (!m_ctrlPane.Create(this, IDD_DIALOGBAR, CBRS_ALIGN_TOP, IDD_DIALOGBAR))
+	{
+		TRACE(_T("Failed to create controll pane "));
+		return -1;
+	}
+
+	//
+	m_ctrlPane.EnableGripper(TRUE);
+	m_ctrlPane.SetWindowText(_T("控制面板"));
+	// 可以停靠 上下
+	m_ctrlPane.EnableDocking(CBRS_ALIGN_TOP | CBRS_ALIGN_BOTTOM);
+	// 浮动
+	m_ctrlPane.FloatPane(&rectPos);
+	// 显示面板
+	m_ctrlPane.ShowPane(TRUE, FALSE, TRUE);
 	return 0;
 }
 
@@ -230,3 +251,4 @@ void CMainFrame::OnFileClose()
 {
 	DestroyWindow();
 }
+

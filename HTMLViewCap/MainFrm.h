@@ -3,9 +3,11 @@
 //
 
 #pragma once
+#include "ControllPane.h"
 
 class CMainFrame : public CFrameWndEx
 {
+	
 	
 protected: // 仅从序列化创建
 	CMainFrame();
@@ -35,6 +37,8 @@ protected:  // 控件条嵌入成员
 	CMFCToolBar       m_wndToolBar;
 	CMFCStatusBar     m_wndStatusBar;
 	CMFCToolBarImages m_UserImages;
+	//CPaneDialog       m_wndPneDlg;
+	CControllPane     m_ctrlPane;
 
 // 生成的消息映射函数
 protected:
@@ -44,6 +48,14 @@ protected:
 	afx_msg LRESULT OnToolbarCreateNew(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
+//public:
+//	afx_msg void OnStart();
+//	afx_msg void OnStop();
+//	afx_msg void OnUpdateStart(CCmdUI *pCmdUI);
+//	afx_msg void OnUpdateStop(CCmdUI *pCmdUI);
+//
+//private:
+//	BOOL m_bIsStart;
 };
 
 

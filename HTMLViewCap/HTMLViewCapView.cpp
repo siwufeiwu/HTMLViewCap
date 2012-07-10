@@ -28,7 +28,8 @@ BEGIN_MESSAGE_MAP(CHTMLViewCapView, CHtmlView)
 	ON_COMMAND(ID_FILE_PRINT, &CHtmlView::OnFilePrint)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
-	ON_COMMAND(ID_SAVEIAMGE, &CHTMLViewCapView::OnSaveiamge)
+	ON_WM_SIZE()
+	ON_COMMAND(ID_SAVEIMAGE, &CHTMLViewCapView::OnSaveImage)
 END_MESSAGE_MAP()
 
 // CHTMLViewCapView 构造/析构
@@ -112,6 +113,11 @@ CHTMLViewCapDoc* CHTMLViewCapView::GetDocument() const // 非调试版本是内联的
 
 
 // CHTMLViewCapView 消息处理程序
+void CHTMLViewCapView::OnSize(UINT nType, int cx, int cy)
+{
+
+}
+
 
 
 
@@ -147,7 +153,7 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
    return -1;  // Failure
 }
 
-void CHTMLViewCapView::OnSaveiamge()
+void CHTMLViewCapView::OnSaveImage()
 {
 	// Initialize GDI+.
 	GdiplusStartupInput gdiplusStartupInput;
@@ -160,10 +166,11 @@ void CHTMLViewCapView::OnSaveiamge()
 	if (m_pBrowserApp->Navigate2(&vUrl, NULL, NULL, NULL, NULL) == S_OK)
 		RunModalLoop();
 	else
-		TRACE("Nav2 FALSE!\n");
+		TRACE(_T("m_pBrowserApp->Navigate2 FALSE!\n"));
 
 	// wait for document to load
     //....
+	TRACE(_T("Document Complete!\n"));
 
     /// render to enhanced metafile HDC.
     IDispatch *pDoc = (IDispatch *) NULL;
@@ -171,25 +178,9 @@ void CHTMLViewCapView::OnSaveiamge()
     IViewObject* pViewObject = NULL;
     pDoc->QueryInterface(IID_IViewObject, (void**)&pViewObject); // result is first div of document
 
-	/*
-	Bitmap myBmp(800, 600);
-	Graphics g(&myBmp);
-	HDC mydc = g.GetHDC();
-	if (mydc != NULL)
-	{
-		HRESULT drawResult = OleDraw(pViewObject, DVASPECT_CONTENT, mydc, NULL);
-		g.ReleaseHDC(mydc);
-	}
-
-	CLSID jpegClsid;
-	GetEncoderClsid(_T("image/jpeg"), &jpegClsid);
-	myBmp.Save(_T("c://1.jpg"), &jpegClsid, NULL);
-	*/
-
 	m_pBrowserApp->put_Width(1024);
 	m_pBrowserApp->put_Height(1024);
 
-	CFileSpec fsDest(_T("1.bmp"));
 	CBitmapDC destDC(1024, 1024);
     HRESULT drawResult = OleDraw(pViewObject, DVASPECT_CONTENT, destDC, NULL);
 	pViewObject->Release();
@@ -197,39 +188,10 @@ void CHTMLViewCapView::OnSaveiamge()
 	CBitmap *pBM = destDC.Close();
 	Bitmap *gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
 	CLSID jpegClsid;
-	::GetEncoderClsid(_T("image/bmp"), &jpegClsid);
+	::GetEncoderClsid(_T("image/jpeg"), &jpegClsid);
 	gdiBMP->Save(_T("c://1.jpg"), &jpegClsid, NULL);
 
-	//Bitmap *gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
-	//gdiBMP->Save(_T("C:\\1.bmp"), 2);
-/*	Image  *gdiThumb = gdiBMP->GetThumbnailImage(100, 100)*/;
-
-//// Create an Image object based on a PNG file.
-//   Image  image(L"Mosaic.png");
-//
-//   Graphics graphics(hdc);
-//   // Draw the image.
-//   graphics.DrawImage(&image, 10, 10);
-//
-//   // Construct a Graphics object based on the image.
-//   Graphics imageGraphics(&image);
-//
-//   // Alter the image.
-//   SolidBrush brush(Color(255, 0, 0, 255));
-//   imageGraphics.FillEllipse(&brush, 20, 30, 80, 50);
-//
-//   // Draw the altered image.
-//   graphics.DrawImage(&image, 200, 10);
-//
-//   // Save the altered image.
-//   CLSID pngClsid;
-//   GetEncoderClsid(L"image/png", &pngClsid);
-//   image.Save(L"Mosaic2.png", &pngClsid, NULL);
-
-	//gdiThumb->Save(A2W(fsDest.GetFullSpec()), &m_encoderClsid);
-	//delete gdiBMP;
-	////delete gdiThumb;
-	//delete pBM;
-
+	pDoc->Release();
+	pViewObject->Release();
 	GdiplusShutdown(gdiplusToken);
 }

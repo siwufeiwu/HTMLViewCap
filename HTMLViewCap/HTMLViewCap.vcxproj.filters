@@ -63,6 +63,12 @@
     <ClInclude Include="FileSpec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HTMLImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ControllPane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HTMLViewCap.cpp">
@@ -84,6 +90,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BitmapDC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HTMLImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ControllPane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

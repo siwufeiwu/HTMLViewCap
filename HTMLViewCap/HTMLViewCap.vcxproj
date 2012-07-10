@@ -104,7 +104,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitmapDC.h" />
+    <ClInclude Include="ControllPane.h" />
     <ClInclude Include="FileSpec.h" />
+    <ClInclude Include="HTMLImage.h" />
     <ClInclude Include="HTMLViewCap.h" />
     <ClInclude Include="HTMLViewCapDoc.h" />
     <ClInclude Include="HTMLViewCapView.h" />
@@ -115,7 +117,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BitmapDC.cpp" />
+    <ClCompile Include="ControllPane.cpp" />
     <ClCompile Include="FileSpec.cpp" />
+    <ClCompile Include="HTMLImage.cpp" />
     <ClCompile Include="HTMLViewCap.cpp" />
     <ClCompile Include="HTMLViewCapDoc.cpp" />
     <ClCompile Include="HTMLViewCapView.cpp" />

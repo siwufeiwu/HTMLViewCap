@@ -41,6 +41,7 @@ using namespace Gdiplus;
 #include <afxcontrolbars.h>     // 功能区和控件条的 MFC 支持
 
 #include <afxhtml.h>                    // MFC HTML 视图支持
+#include <afx.h>
 
 
 
