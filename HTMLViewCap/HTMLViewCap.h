@@ -19,6 +19,8 @@ class CHTMLViewCapApp : public CWinAppEx
 public:
 	CHTMLViewCapApp();
 
+	CString m_csImageDir;
+
 protected:
 	CMultiDocTemplate* m_pDocTemplate;
 public:

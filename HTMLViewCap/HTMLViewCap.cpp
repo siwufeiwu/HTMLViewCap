@@ -61,6 +61,23 @@ CHTMLViewCapApp theApp;
 
 BOOL CHTMLViewCapApp::InitInstance()
 {
+	// 创建图片保存目录
+	const int nLen = 248;
+	TCHAR bufDir[nLen];
+	CTime t = CTime::GetCurrentTime();
+	CString csDir(_T("\\image"));
+	CString csDate = t.Format("\\%Y-%m-%d");
+	// 获取当前目录
+	::GetCurrentDirectory(nLen, bufDir);
+	CString csPath(bufDir);
+	csPath.Append(csDir);
+	// 创建image目录
+	::CreateDirectory(csPath.GetString(), NULL);
+	csPath.Append(csDate);
+	// 创建日期目录
+	::CreateDirectory(csPath.GetString(), NULL);
+	m_csImageDir = csPath;
+
 	// 如果一个运行在 Windows XP 上的应用程序清单指定要
 	// 使用 ComCtl32.dll 版本 6 或更高版本来启用可视化方式，
 	//则需要 InitCommonControlsEx()。否则，将无法创建窗口。

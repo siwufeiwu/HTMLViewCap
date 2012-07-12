@@ -47,15 +47,6 @@ protected:
 	afx_msg void OnViewCustomize();
 	afx_msg LRESULT OnToolbarCreateNew(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
-
-//public:
-//	afx_msg void OnStart();
-//	afx_msg void OnStop();
-//	afx_msg void OnUpdateStart(CCmdUI *pCmdUI);
-//	afx_msg void OnUpdateStop(CCmdUI *pCmdUI);
-//
-//private:
-//	BOOL m_bIsStart;
 };
 
 

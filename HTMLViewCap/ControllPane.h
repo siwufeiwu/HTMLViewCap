@@ -14,7 +14,6 @@ public:
 protected:
 	DECLARE_MESSAGE_MAP()
 
-
 public:
 	afx_msg void OnStart();
 	afx_msg void OnStop();
@@ -25,7 +24,20 @@ public:
 	virtual void OnInitDialog();
 private:
 	BOOL m_bIsStart;
+	int m_nHour;
+	int m_nMinute;
+	int m_nIntervel;
 	CComboBox m_cbHours;
+
+	CTime m_tCurrent;
+	CTime m_tDest;
+	CTimeSpan m_tsDiff;
+	CTimeSpan m_tsTmSpanDiff;
+
+	// Methods
+	void UpdateTime();
+public:
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
 
 

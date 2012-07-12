@@ -118,9 +118,6 @@ void CHTMLViewCapView::OnSize(UINT nType, int cx, int cy)
 
 }
 
-
-
-
 // 
 int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 {
@@ -155,14 +152,32 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 
 void CHTMLViewCapView::OnSaveImage()
 {
+	// 创建输出文件路径
+	CTime t = CTime::GetCurrentTime();
+	CString csTime = t.Format("\\%H时%M分%S秒-");
+	CString csPath = ::theApp.m_csImageDir;
+	csPath.Append(csTime);
+
 	// Initialize GDI+.
 	GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR gdiplusToken;
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
+	CList<CString> lstUrl;
+	lstUrl.AddTail(CString(_T("http://178.com")));
+	lstUrl.AddTail(CString(_T("http://weibo.com")));
+
 	VARIANT vUrl;
 	vUrl.vt = ::VT_BSTR;
-	vUrl.bstrVal = _T("http://weibo.com");
+	//vUrl.bstrVal = (BSTR)csUrl.GetString();  
+
+	for (POSITION pos = lstUrl.GetHeadPosition();
+		pos != NULL;
+		pos = lstUrl.GetNext())
+	{
+
+	}
+
 	if (m_pBrowserApp->Navigate2(&vUrl, NULL, NULL, NULL, NULL) == S_OK)
 		RunModalLoop();
 	else
@@ -189,7 +204,8 @@ void CHTMLViewCapView::OnSaveImage()
 	Bitmap *gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
 	CLSID jpegClsid;
 	::GetEncoderClsid(_T("image/jpeg"), &jpegClsid);
-	gdiBMP->Save(_T("c://1.jpg"), &jpegClsid, NULL);
+	csPath.Append(_T("1.jpg"));
+	gdiBMP->Save(csPath.GetString(), &jpegClsid, NULL);
 
 	pDoc->Release();
 	pViewObject->Release();

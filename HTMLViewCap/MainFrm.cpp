@@ -143,14 +143,14 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SIZE  s = {300, 800};
 	CRect rectPos(p, s);
 
-	// 
+	// 创建 控制面板
 	if (!m_ctrlPane.Create(this, IDD_DIALOGBAR, CBRS_ALIGN_TOP, IDD_DIALOGBAR))
 	{
 		TRACE(_T("Failed to create controll pane "));
 		return -1;
 	}
 
-	//
+	// 设置 标题
 	m_ctrlPane.EnableGripper(TRUE);
 	m_ctrlPane.SetWindowText(_T("控制面板"));
 	// 可以停靠 上下
