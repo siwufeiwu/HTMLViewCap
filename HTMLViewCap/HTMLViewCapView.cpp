@@ -17,7 +17,6 @@
 #endif
 
 #include "BitmapDC.h"
-#include "FileSpec.h"
 
 // CHTMLViewCapView
 
@@ -173,7 +172,7 @@ void CHTMLViewCapView::OnSaveImage()
 
 	for (POSITION pos = lstUrl.GetHeadPosition();
 		pos != NULL;
-		pos = lstUrl.GetNext())
+		lstUrl.GetNext(pos))
 	{
 
 	}
