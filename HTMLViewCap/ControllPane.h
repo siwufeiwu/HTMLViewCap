@@ -46,6 +46,8 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBtnAddurl();
 	afx_msg void OnUpdateBtnAddurl(CCmdUI *pCmdUI);
+	afx_msg void OnBtnImportExcel();
+	afx_msg void OnUpdateBtnImportExcel(CCmdUI *pCmdUI);
 };
 
 

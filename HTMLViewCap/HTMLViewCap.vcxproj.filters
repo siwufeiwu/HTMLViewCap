@@ -66,6 +66,9 @@
     <ClInclude Include="ControllPane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HtmlViewCapUrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HTMLViewCap.cpp">
@@ -90,6 +93,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ControllPane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HtmlViewCapUrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

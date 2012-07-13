@@ -9,6 +9,7 @@
 
 #include "ControllPane.h"
 
+#include "HtmlViewCapUrl.h"
 
 
 // CControllPane
@@ -77,6 +78,8 @@ BEGIN_MESSAGE_MAP(CControllPane, CPaneDialog)
 	ON_COMMAND(IDC_BTN_ADDURL, &CControllPane::OnBtnAddurl)
 	ON_UPDATE_COMMAND_UI(IDC_BTN_ADDURL, &CControllPane::OnUpdateBtnAddurl)
 	ON_MESSAGE(WM_INITDIALOG, &CControllPane::HandleInitDialog)
+	ON_COMMAND(IDC_BTN_IMPORT_EXCEL, &CControllPane::OnBtnImportExcel)
+	ON_UPDATE_COMMAND_UI(IDC_BTN_IMPORT_EXCEL, &CControllPane::OnUpdateBtnImportExcel)
 END_MESSAGE_MAP()
 
 // CControllPane message handlers
@@ -215,6 +218,52 @@ void CControllPane::OnBtnAddurl()
 }
 
 void CControllPane::OnUpdateBtnAddurl(CCmdUI *pCmdUI)
+{
+	pCmdUI->Enable(!m_bIsStart);
+}
+
+void CControllPane::OnBtnImportExcel()
+{
+	BasicExcel e;
+	CFileDialog dlgFile(TRUE);
+	CStringA fileName;
+	if(dlgFile.DoModal() != IDOK)
+	{
+		TRACE(_T("CFileDialog Cancel.\n"));
+		return;
+	}
+	fileName = dlgFile.GetPathName();
+	e.Load(fileName.GetString());
+
+	BasicExcelWorksheet* URLSheet = e.GetWorksheet("URL");
+
+	if (URLSheet == NULL) 
+	{
+		TRACE(_T("Open xls file filed."));
+		return ;
+	}
+
+	CList<CHtmlViewCapUrl> lstUrl;
+	if (URLSheet) {
+		const DWORD nColLen = 3;
+		const DWORD nRowLen = URLSheet->GetTotalRows();
+		for (int i=1; i<nRowLen; ++i)
+		{
+			BasicExcelCell *cell = URLSheet->Cell(i, 0);
+			CStringA csUrl = cell->GetString();
+			cell = URLSheet->Cell(i, 1);
+			DWORD nWidth = cell->GetInteger();
+			cell = URLSheet->Cell(i, 2);
+			DWORD nHeight = cell->GetInteger();
+				
+			//lstUrl.AddTail(CHtmlViewCapUrl(csUrl, nWidth, nHeight));
+		}
+
+	} 
+}
+
+
+void CControllPane::OnUpdateBtnImportExcel(CCmdUI *pCmdUI)
 {
 	pCmdUI->Enable(!m_bIsStart);
 }

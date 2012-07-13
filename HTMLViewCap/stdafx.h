@@ -43,12 +43,10 @@ using namespace Gdiplus;
 #include <afxhtml.h>                    // MFC HTML  ”Õº÷ß≥÷
 #include <afx.h>
 
+#include <afxdlgs.h>
 
-
-
-
-
-
+#include <BasicExcel.hpp>
+using namespace YExcel;
 
 #ifdef _UNICODE
 #if defined _M_IX86
