@@ -139,14 +139,14 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CMFCToolBar::SetBasicCommands(lstBasicCommands);
 
 	// 设置 位置和大小
-	POINT p = {0, 0};
-	SIZE  s = {300, 800};
+	POINT p = {300, 300};
+	SIZE  s = {300, 500};
 	CRect rectPos(p, s);
 
 	// 创建 控制面板
 	if (!m_ctrlPane.Create(this, IDD_DIALOGBAR, CBRS_ALIGN_TOP, IDD_DIALOGBAR))
 	{
-		TRACE(_T("Failed to create controll pane "));
+		TRACE(_T("Failed to create controll pane!\n"));
 		return -1;
 	}
 

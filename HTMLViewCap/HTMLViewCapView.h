@@ -17,6 +17,7 @@ public:
 
 // ²Ù×÷
 public:
+	void SaveImages(CList<CString> &lstUrl);
 
 // ÖØĞ´
 public:

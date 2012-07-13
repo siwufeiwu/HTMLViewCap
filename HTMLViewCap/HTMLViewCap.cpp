@@ -112,9 +112,8 @@ BOOL CHTMLViewCapApp::InitInstance()
 	// 更改用于存储设置的注册表项
 	// TODO: 应适当修改该字符串，
 	// 例如修改为公司或组织名
-	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
+	SetRegistryKey(_T("uniclick"));
 	LoadStdProfileSettings(4);  // 加载标准 INI 文件选项(包括 MRU)
-
 
 	InitContextMenuManager();
 
@@ -191,6 +190,8 @@ protected:
 // 实现
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	CButton m_btnOK;
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
@@ -200,6 +201,7 @@ CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDOK, m_btnOK);
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)

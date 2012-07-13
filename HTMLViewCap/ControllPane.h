@@ -19,15 +19,21 @@ public:
 	afx_msg void OnStop();
 	afx_msg void OnUpdateStart(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateStop(CCmdUI *pCmdUI);
+	afx_msg LRESULT HandleInitDialog(WPARAM wParam,LPARAM lParam);
 
 	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual void OnInitDialog();
 private:
 	BOOL m_bIsStart;
+	int m_nIntervel;
 	int m_nHour;
 	int m_nMinute;
-	int m_nIntervel;
+
+	CString m_csState;
+	CString m_csUrl;
+
 	CComboBox m_cbHours;
+	CComboBox m_cbMins;
+	CListBox m_lstUrl;
 
 	CTime m_tCurrent;
 	CTime m_tDest;
@@ -38,6 +44,8 @@ private:
 	void UpdateTime();
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnBtnAddurl();
+	afx_msg void OnUpdateBtnAddurl(CCmdUI *pCmdUI);
 };
 
 
