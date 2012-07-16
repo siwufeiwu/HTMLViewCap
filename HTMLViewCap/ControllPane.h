@@ -1,7 +1,6 @@
 #pragma once
 
-
-// CControllPane
+#include "HTMLViewCapUrl.h"
 
 class CControllPane : public CPaneDialog
 {
@@ -27,6 +26,8 @@ private:
 	int m_nIntervel;
 	int m_nHour;
 	int m_nMinute;
+	int m_nWidth;
+	int m_nHeight;
 
 	CString m_csState;
 	CString m_csUrl;
@@ -39,6 +40,8 @@ private:
 	CTime m_tDest;
 	CTimeSpan m_tsDiff;
 	CTimeSpan m_tsTmSpanDiff;
+
+	CList<CHTMLViewCapUrl> m_lstHTMLUrl;
 
 	// Methods
 	void UpdateTime();

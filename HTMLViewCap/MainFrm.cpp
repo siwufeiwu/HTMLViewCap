@@ -6,7 +6,7 @@
 #include "HTMLViewCap.h"
 
 #include "MainFrm.h"
-#include "HTMLImage.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -140,7 +140,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// 设置 位置和大小
 	POINT p = {300, 300};
-	SIZE  s = {300, 500};
+	SIZE  s = {500, 300};
 	CRect rectPos(p, s);
 
 	// 创建 控制面板

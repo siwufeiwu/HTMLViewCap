@@ -2,20 +2,21 @@
 #include "HtmlViewCapUrl.h"
 
 
-CHtmlViewCapUrl::CHtmlViewCapUrl(void)
+CHTMLViewCapUrl::CHTMLViewCapUrl(void)
 {
 	
 }
 
 
-CHtmlViewCapUrl::~CHtmlViewCapUrl(void)
+CHTMLViewCapUrl::~CHTMLViewCapUrl(void)
 {
 
 }
 
-CHtmlViewCapUrl::CHtmlViewCapUrl(CString csUrl, 
+CHTMLViewCapUrl::CHTMLViewCapUrl(CString csUrl, 
 								 DWORD nWidth, 
-								 DWORD nHeight)
+								 DWORD nHeight) :
+m_csUrl(csUrl), m_nWidth(nWidth), m_nHeight(nHeight)
 {
 
 }

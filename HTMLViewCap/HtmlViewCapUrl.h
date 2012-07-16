@@ -1,12 +1,13 @@
 #pragma once
-class CHtmlViewCapUrl
+class CHTMLViewCapUrl
 {
 public:
-	CHtmlViewCapUrl(void);
-	~CHtmlViewCapUrl(void);
+	CHTMLViewCapUrl(void);
+	~CHTMLViewCapUrl(void);
 
-	CHtmlViewCapUrl(CString csUrl, DWORD nWidth, DWORD nHeight);
-private:
+	CHTMLViewCapUrl(CString csUrl, DWORD nWidth, DWORD nHeight);
+
+public:
 	CString m_csUrl;
 	DWORD m_nWidth;
 	DWORD m_nHeight;

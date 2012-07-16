@@ -9,6 +9,7 @@
 #include "MainFrm.h"
 
 #include "HTMLViewCapDoc.h"
+#include "HtmlViewCapUrl.h"
 #include "HTMLViewCapView.h"
 
 #ifdef _DEBUG

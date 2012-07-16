@@ -5,11 +5,12 @@
 #include "HTMLViewCap.h"
 #include "MainFrm.h"
 #include "HTMLViewCapDoc.h"
+
+#include "HTMLViewCapUrl.h"
+
 #include "HTMLViewCapView.h"
 
 #include "ControllPane.h"
-
-#include "HtmlViewCapUrl.h"
 
 
 // CControllPane
@@ -17,7 +18,7 @@ IMPLEMENT_SERIAL(CControllPane, CPaneDialog, VERSIONABLE_SCHEMA | 1)
 
 CControllPane::CControllPane() : m_bIsStart(FALSE)
 {
-	m_nIntervel = 30;
+	m_nIntervel = 180;
 }
 
 CControllPane::~CControllPane()
@@ -32,16 +33,16 @@ LRESULT CControllPane::HandleInitDialog(WPARAM wParam, LPARAM lParam)
 	/*
 			初始化 URL列表框
 	*/
-	CListBox *lstUrl = (CListBox *)GetDlgItem(IDC_LIST_URL);
-	lstUrl->AddString(_T("http://weibo.com"));
-	lstUrl->AddString(_T("http://qq.com"));
+	//CListBox *lstUrl = (CListBox *)GetDlgItem(IDC_LIST_URL);
+	//lstUrl->AddString(_T("http://weibo.com"));
+	//lstUrl->AddString(_T("http://qq.com"));
 
 	/*
 			小时 ComboBox
 	*/
 	TCHAR tcBuf[3];
 	CComboBox *cbHours = (CComboBox *)GetDlgItem(IDC_HOURS);
-	for (int i=0; i<24; ++i)
+	for (int i=0; i<=24; ++i)
 	{
 		_stprintf_s(tcBuf, _T("%d"), i);
 		cbHours->AddString(tcBuf);
@@ -51,7 +52,7 @@ LRESULT CControllPane::HandleInitDialog(WPARAM wParam, LPARAM lParam)
 			分钟 ComboBox
 	*/
 	CComboBox *cbMins = (CComboBox *)GetDlgItem(IDC_MINS);
-	for (int i=0; i<12; ++i)
+	for (int i=0; i<=60; ++i)
 	{
 		_stprintf_s(tcBuf, _T("%d"), i);
 		cbMins->AddString(tcBuf);
@@ -59,13 +60,26 @@ LRESULT CControllPane::HandleInitDialog(WPARAM wParam, LPARAM lParam)
 	cbMins->SelectString(0, _T("0"));
 
 	/*
-
+			状态 Static
 	*/
 	CStatic *txtState = (CStatic *)GetDlgItem(IDC_TEXT_STATE);
 	CString csState;
 	txtState->GetWindowText(csState);
 	csState.Append(_T("状态: 准备就绪"));
 	txtState->SetWindowText(csState);
+
+	/*
+			高度
+	*/
+	CEdit *edtHeight = (CEdit *)GetDlgItem(IDC_EDIT_HEIGHT);
+	edtHeight->SetWindowText(_T("2048"));
+
+	/*
+			宽度
+	*/
+	CEdit *edtWidth = (CEdit *)GetDlgItem(IDC_EDIT_WIDTH);
+	edtWidth->SetWindowText(_T("1024"));
+
 	return TRUE;
 }
 
@@ -150,6 +164,8 @@ void CControllPane::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_INTERVEL, m_nIntervel);
 	DDX_Text(pDX, IDC_EDIT_URL, m_csUrl);
 	DDX_Text(pDX, IDC_TEXT_STATE, m_csState);
+	DDX_Text(pDX, IDC_EDIT_WIDTH, m_nWidth);
+	DDX_Text(pDX, IDC_EDIT_HEIGHT, m_nHeight);
 }
 
 void CControllPane::OnTimer(UINT_PTR nIDEvent)
@@ -202,7 +218,7 @@ void CControllPane::OnTimer(UINT_PTR nIDEvent)
 			m_lstUrl.GetText(i, csUrl);
 			lstUrl.AddTail(csUrl);
 		}
-		pView->SaveImages(lstUrl);
+		pView->SaveImages(m_lstHTMLUrl);
 		break;
 	default:
 		ASSERT(FALSE);
@@ -213,7 +229,10 @@ void CControllPane::OnTimer(UINT_PTR nIDEvent)
 void CControllPane::OnBtnAddurl()
 {
 	UpdateData(TRUE);
-	m_lstUrl.AddString(m_csUrl);
+	m_lstHTMLUrl.AddTail(CHTMLViewCapUrl(m_csUrl, m_nWidth, m_nHeight));
+	CString url = m_csUrl;
+	url.AppendFormat(_T(" 宽:%d 高:%d "), m_nWidth, m_nHeight);
+	m_lstUrl.AddString(url);
 	UpdateData(TRUE);
 }
 
@@ -239,26 +258,51 @@ void CControllPane::OnBtnImportExcel()
 
 	if (URLSheet == NULL) 
 	{
-		TRACE(_T("Open xls file filed."));
+		MessageBox(_T("打开.xls文件失败，请确认文件格式正确和关闭正在打开的文件之后再重新尝试"),
+				   _T("警告"));
+		TRACE(_T("Open .xls file failed.\n"));
 		return ;
 	}
 
-	CList<CHtmlViewCapUrl> lstUrl;
+	m_lstHTMLUrl.RemoveAll();
 	if (URLSheet) {
 		const DWORD nColLen = 3;
 		const DWORD nRowLen = URLSheet->GetTotalRows();
-		for (int i=1; i<nRowLen; ++i)
+		TCHAR tcUrl[200];
+		for (DWORD i=1; i<nRowLen; ++i)
 		{
 			BasicExcelCell *cell = URLSheet->Cell(i, 0);
-			CStringA csUrl = cell->GetString();
+			const char *cUrl = cell->GetString();
+			MultiByteToWideChar(CP_ACP, 0, cUrl, strlen(cUrl)+1, tcUrl, 200);  
+			CString csUrl(tcUrl);
+	
 			cell = URLSheet->Cell(i, 1);
 			DWORD nWidth = cell->GetInteger();
+			if (nWidth == 0) 
+				nWidth = 1024;
 			cell = URLSheet->Cell(i, 2);
 			DWORD nHeight = cell->GetInteger();
-				
-			//lstUrl.AddTail(CHtmlViewCapUrl(csUrl, nWidth, nHeight));
+			if (nHeight == 0)
+				nHeight = 2048;
+			m_lstHTMLUrl.AddTail(CHTMLViewCapUrl(csUrl, nWidth, nHeight));
 		}
 
+		// 更新GUI 
+		UpdateData(TRUE);
+		m_lstUrl.ResetContent();
+		for (POSITION pos=m_lstHTMLUrl.GetHeadPosition(); 
+			 pos!=m_lstHTMLUrl.GetTailPosition(); 
+			 m_lstHTMLUrl.GetNext(pos))
+		{
+			CHTMLViewCapUrl url = m_lstHTMLUrl.GetAt(pos);
+			CString csUrl = url.m_csUrl;
+			csUrl.AppendFormat(_T(" 宽:%d 高:%d "), url.m_nWidth, url.m_nHeight);
+			m_lstUrl.AddString(csUrl);
+		}
+		UpdateData(TRUE);
+		//
+		MessageBox(_T("读取文件成功。"),
+				   _T("消息"));
 	} 
 }
 
