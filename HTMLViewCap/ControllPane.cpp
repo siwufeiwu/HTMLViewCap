@@ -96,10 +96,31 @@ BEGIN_MESSAGE_MAP(CControllPane, CPaneDialog)
 	ON_UPDATE_COMMAND_UI(IDC_BTN_IMPORT_EXCEL, &CControllPane::OnUpdateBtnImportExcel)
 END_MESSAGE_MAP()
 
+UINT CloseErrorWnd(LPVOID pParam)
+{
+	HWND hWnd = NULL;
+	BOOL isClosed = FALSE;
+	while (isClosed != TRUE) {
+		hWnd = ::FindWindow(_T("Internet Explorer_TridentDlgFrame"), 
+							_T("Internet Explorer ½Å±¾´íÎó"));
+		if (hWnd != NULL)
+		{
+			SendMessage(hWnd,   WM_SYSCOMMAND,   SC_CLOSE,   0);
+			hWnd = NULL;
+			TRACE("Closed windows!\n");
+		}
+		Sleep(1000);
+	}
+    return 0;   // thread completed successfully
+}
+
+
 // CControllPane message handlers
 void CControllPane::OnStart()
 {
 	UpdateData(TRUE);
+
+	AfxBeginThread(CloseErrorWnd, NULL);
 	//m_nHour	 = m_cbHours.GetCurSel();
 	//m_nMinute  = m_cbMins.GetCurSel();
 
@@ -175,6 +196,7 @@ void CControllPane::OnTimer(UINT_PTR nIDEvent)
 	CList<CString> lstUrl;
 	CStatic *txtState;
 	CString csState;
+
 #ifdef _DEBUG
 	CString csTime;
 #endif

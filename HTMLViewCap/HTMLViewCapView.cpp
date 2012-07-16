@@ -63,7 +63,29 @@ void CHTMLViewCapView::DocumentComplete(LPDISPATCH pDisp, VARIANT* URL)
 	UNUSED_ALWAYS(pDisp);
 	UNUSED_ALWAYS(URL);
 
-	EndModalLoop(S_OK);
+	HRESULT hr;
+	IUnknown* pUnkBrowser = NULL;
+    IUnknown* pUnkDisp = NULL;
+	IStream* pStream = NULL;
+	// 这个 DocumentComplete 事件是否是顶层框架窗口的?
+    // 检查 COM 标识: 比较IUnknown 接口指针.
+	hr = m_pBrowserApp->QueryInterface( IID_IUnknown, (void**)&pUnkBrowser );
+
+	if ( SUCCEEDED(hr) ) {
+		hr = pDisp->QueryInterface( IID_IUnknown,  (void**)&pUnkDisp );
+
+		if ( SUCCEEDED(hr) ) {
+			if ( pUnkBrowser == pUnkDisp ) {
+				TRACE("Document completely loaded!\n");
+				EndModalLoop(S_OK);
+			}
+		}
+
+		pUnkDisp->Release();
+	}
+	pUnkBrowser->Release();
+
+	//EndModalLoop(S_OK);
 }
 
 
@@ -153,52 +175,79 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 
 void CHTMLViewCapView::OnSaveImage()
 {
-	CList<CString> lstUrl;
-	lstUrl.AddTail(CString(_T("http://178.com")));
-	lstUrl.AddTail(CString(_T("http://weibo.com")));
-	lstUrl.AddTail(CString(_T("http://qq.com")));
+	//CList<CString> lstUrl;
+	//lstUrl.AddTail(CString(_T("http://178.com")));
+	//lstUrl.AddTail(CString(_T("http://weibo.com")));
+	//lstUrl.AddTail(CString(_T("http://qq.com")));
 
-	SaveImages(lstUrl);
+	//SaveImages(lstUrl);
 }
 
 void CHTMLViewCapView::SaveImages(CList<CString> &lstUrl)
 {
 
-	// Initialize GDI+.
-	GdiplusStartupInput gdiplusStartupInput;
-	ULONG_PTR gdiplusToken;
-	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+}
 
-	for (POSITION pos = lstUrl.GetHeadPosition();
+void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
+{
+	// Initialize GDI+.
+	POSITION pos = NULL;
+	int nWidth  = 1024;
+	int nHeight = 2048;
+	IDispatch *pDoc = NULL;
+	IViewObject *pViewObject = NULL;
+	VARIANT vUrl;
+	CTime t;
+	CString csTime;
+	CString csPath;
+	CString csFileName;
+	HRESULT hr;
+	CBitmap *pBM;
+	Bitmap *gdiBMP;
+
+	for (pos = lstUrl.GetHeadPosition();
 		pos != NULL;
 		lstUrl.GetNext(pos))
 	{
-		IDispatch *pDoc = NULL;
-		IViewObject *pViewObject = NULL;
-		VARIANT vUrl;
+		GdiplusStartupInput gdiplusStartupInput;
+		ULONG_PTR gdiplusToken;
+		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+		CLSID jpegClsid;
+		::GetEncoderClsid(_T("image/jpeg"), &jpegClsid);
+
+		nWidth  = lstUrl.GetAt(pos).m_nWidth;
+		nHeight = lstUrl.GetAt(pos).m_nHeight;
+		CString csUrl = lstUrl.GetAt(pos).m_csUrl;
+		CBitmapDC destDC(nWidth, nHeight);
 
 		// 创建输出文件路径
-		CTime t = CTime::GetCurrentTime();
-		CString csTime = t.Format("\\%H时%M分%S秒-");
-		CString csPath = ::theApp.m_csImageDir;
+		t = CTime::GetCurrentTime();
+		csTime = t.Format("\\%H时%M分%S秒-");
+		csPath = ::theApp.m_csImageDir;
 		csPath.Append(csTime);
 
 		vUrl.vt = ::VT_BSTR;
-		vUrl.bstrVal = (BSTR)(lstUrl.GetAt(pos).GetString());  
+		vUrl.bstrVal = (BSTR)csUrl.GetString();  
+
+		m_pBrowserApp->put_Width(nWidth);
+		m_pBrowserApp->put_Height(nHeight);
 
 		if (m_pBrowserApp->Navigate2(&vUrl, NULL, NULL, NULL, NULL) == S_OK)
 				RunModalLoop();
 		else {
-				TRACE(_T("%d Document Navigate Failed!\n"));
-				return ;
+				TRACE(_T("%d Document Navigate Failed!\n"), vUrl);
+				MessageBox(_T("Navi Error"), _T("Error"), MB_OK);
+				//continue ;
 		}
-				
+
+		//Sleep(2000);
 		// wait for document to load
 		//....
-		TRACE(_T("%s Document Complete!\n"), vUrl.bstrVal);
-		m_pBrowserApp->Refresh();
+		//TRACE(_T("%s Document Complete!\n"), vUrl.bstrVal);
+		//m_pBrowserApp->Refresh();
+
 		// render to enhanced metafile HDC.
-		HRESULT hr = m_pBrowserApp->get_Document(&pDoc);
+		hr = m_pBrowserApp->get_Document(&pDoc);
 
 		if (hr != S_OK) {
 			TRACE(_T("%s get_Document failed!\n"), vUrl.bstrVal);
@@ -212,17 +261,14 @@ void CHTMLViewCapView::SaveImages(CList<CString> &lstUrl)
 			return ;
 		}
 
-		m_pBrowserApp->put_Width(1024);
-		m_pBrowserApp->put_Height(1024);
+		hr = OleDraw(pViewObject, DVASPECT_CONTENT, destDC, NULL);
+		if (hr != S_OK) {
+			TRACE(_T("%s OleDraw failed!\n"), vUrl.bstrVal);
+			return ;
+		}
 
-		CBitmapDC destDC(1024, 1024);
-		HRESULT drawResult = OleDraw(pViewObject, DVASPECT_CONTENT, destDC, NULL);
-
-		CBitmap *pBM = destDC.Close();
-		Bitmap *gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
-		CLSID jpegClsid;
-		::GetEncoderClsid(_T("image/jpeg"), &jpegClsid);
-		CString csFileName;
+		pBM = destDC.Close();
+		gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
 		csFileName.Format(_T("%u.jpg"), pos);
 		csPath.Append(csFileName);
 		gdiBMP->Save(csPath.GetString(), &jpegClsid, NULL);
@@ -231,78 +277,5 @@ void CHTMLViewCapView::SaveImages(CList<CString> &lstUrl)
 		pViewObject->Release();
 		GdiplusShutdown(gdiplusToken);
 	}
-}
 
-void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
-{
-	// Initialize GDI+.
-	GdiplusStartupInput gdiplusStartupInput;
-	ULONG_PTR gdiplusToken;
-	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-	for (POSITION pos = lstUrl.GetHeadPosition();
-		pos != NULL;
-		lstUrl.GetNext(pos))
-	{
-		int nWidth  = lstUrl.GetAt(pos).m_nWidth;
-		int nHeight = lstUrl.GetAt(pos).m_nHeight;
-		CString csUrl = lstUrl.GetAt(pos).m_csUrl;
-
-		IDispatch *pDoc = NULL;
-		IViewObject *pViewObject = NULL;
-		VARIANT vUrl;
-
-		// 创建输出文件路径
-		CTime t = CTime::GetCurrentTime();
-		CString csTime = t.Format("\\%H时%M分%S秒-");
-		CString csPath = ::theApp.m_csImageDir;
-		csPath.Append(csTime);
-
-		vUrl.vt = ::VT_BSTR;
-		vUrl.bstrVal = (BSTR)csUrl.GetString();  
-
-		if (m_pBrowserApp->Navigate2(&vUrl, NULL, NULL, NULL, NULL) == S_OK)
-				RunModalLoop();
-		else {
-				TRACE(_T("%d Document Navigate Failed!\n"), vUrl);
-				MessageBox(_T("Navi Error"), _T("Error"), MB_OK);
-		}
-		
-		m_pBrowserApp->put_Width(nWidth);
-		m_pBrowserApp->put_Height(nHeight);
-		Sleep(2000);
-		// wait for document to load
-		//....
-		TRACE(_T("%s Document Complete!\n"), vUrl.bstrVal);
-		m_pBrowserApp->Refresh();
-
-		// render to enhanced metafile HDC.
-		HRESULT hr = m_pBrowserApp->get_Document(&pDoc);
-
-		if (hr != S_OK) {
-			TRACE(_T("%s get_Document failed!\n"), vUrl.bstrVal);
-			return ;
-		}
-
-		pDoc->QueryInterface(IID_IViewObject, (void**)&pViewObject); // result is first div of document
-
-		if (pDoc == NULL) {
-			TRACE(_T("%d query IID_IViewObject failed!\n"), vUrl.bstrVal);
-			return ;
-		}
-
-		CBitmapDC destDC(nWidth, nHeight);
-		HRESULT drawResult = OleDraw(pViewObject, DVASPECT_CONTENT, destDC, NULL);
-
-		CBitmap *pBM = destDC.Close();
-		Bitmap *gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
-		CLSID jpegClsid;
-		::GetEncoderClsid(_T("image/jpeg"), &jpegClsid);
-		CString csFileName;
-		csFileName.Format(_T("%u.jpg"), pos);
-		csPath.Append(csFileName);
-		gdiBMP->Save(csPath.GetString(), &jpegClsid, NULL);
-		pDoc->Release();
-		pViewObject->Release();
-	}
-	GdiplusShutdown(gdiplusToken);
 }
