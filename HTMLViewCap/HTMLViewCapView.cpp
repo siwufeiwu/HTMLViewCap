@@ -37,12 +37,16 @@ END_MESSAGE_MAP()
 
 CHTMLViewCapView::CHTMLViewCapView()
 {
-	// TODO: 在此处添加构造代码
+	// Initialize GDI+.
+	GdiplusStartupInput gdiplusStartupInput;
+	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+	::GetEncoderClsid(_T("image/jpeg"), &m_jpegClsid);
 
 }
 
 CHTMLViewCapView::~CHTMLViewCapView()
 {
+	GdiplusShutdown(m_gdiplusToken);
 }
 
 BOOL CHTMLViewCapView::PreCreateWindow(CREATESTRUCT& cs)
@@ -84,8 +88,6 @@ void CHTMLViewCapView::DocumentComplete(LPDISPATCH pDisp, VARIANT* URL)
 		pUnkDisp->Release();
 	}
 	pUnkBrowser->Release();
-
-	//EndModalLoop(S_OK);
 }
 
 
@@ -190,7 +192,9 @@ void CHTMLViewCapView::SaveImages(CList<CString> &lstUrl)
 
 void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 {
-	// Initialize GDI+.
+
+
+	//
 	POSITION pos = NULL;
 	int nWidth  = 1024;
 	int nHeight = 2048;
@@ -209,11 +213,6 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 		pos != NULL;
 		lstUrl.GetNext(pos))
 	{
-		GdiplusStartupInput gdiplusStartupInput;
-		ULONG_PTR gdiplusToken;
-		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-		CLSID jpegClsid;
-		::GetEncoderClsid(_T("image/jpeg"), &jpegClsid);
 
 		nWidth  = lstUrl.GetAt(pos).m_nWidth;
 		nHeight = lstUrl.GetAt(pos).m_nHeight;
@@ -239,12 +238,8 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 				MessageBox(_T("Navi Error"), _T("Error"), MB_OK);
 				//continue ;
 		}
-
-		//Sleep(2000);
 		// wait for document to load
-		//....
-		//TRACE(_T("%s Document Complete!\n"), vUrl.bstrVal);
-		//m_pBrowserApp->Refresh();
+		m_pBrowserApp->Refresh();
 
 		// render to enhanced metafile HDC.
 		hr = m_pBrowserApp->get_Document(&pDoc);
@@ -269,13 +264,14 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 
 		pBM = destDC.Close();
 		gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
+
 		csFileName.Format(_T("%u.jpg"), pos);
 		csPath.Append(csFileName);
-		gdiBMP->Save(csPath.GetString(), &jpegClsid, NULL);
-
-		pDoc->Release();
+		gdiBMP->Save(csPath.GetString(), &m_jpegClsid, NULL);
+	
+		delete gdiBMP;
+		pBM->DeleteObject();
 		pViewObject->Release();
-		GdiplusShutdown(gdiplusToken);
+		pDoc->Release();
 	}
-
 }

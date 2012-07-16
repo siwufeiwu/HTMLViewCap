@@ -7,6 +7,9 @@
 
 class CHTMLViewCapView : public CHtmlView
 {
+	ULONG_PTR m_gdiplusToken;
+	CLSID m_jpegClsid;
+
 protected: // 仅从序列化创建
 	CHTMLViewCapView();
 	DECLARE_DYNCREATE(CHTMLViewCapView)

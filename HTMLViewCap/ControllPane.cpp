@@ -16,14 +16,15 @@
 // CControllPane
 IMPLEMENT_SERIAL(CControllPane, CPaneDialog, VERSIONABLE_SCHEMA | 1)
 
-CControllPane::CControllPane() : m_bIsStart(FALSE)
+CControllPane::CControllPane() : 
+		m_bIsStart(FALSE), m_nIntervel(180), m_pThrdClosed(NULL)
 {
-	m_nIntervel = 180;
+	::InitializeCriticalSection(&m_cs);
 }
 
 CControllPane::~CControllPane()
 {
-
+	::DeleteCriticalSection(&m_cs);
 }
 
 LRESULT CControllPane::HandleInitDialog(WPARAM wParam, LPARAM lParam)
@@ -120,9 +121,10 @@ void CControllPane::OnStart()
 {
 	UpdateData(TRUE);
 
-	AfxBeginThread(CloseErrorWnd, NULL);
-	//m_nHour	 = m_cbHours.GetCurSel();
-	//m_nMinute  = m_cbMins.GetCurSel();
+	if (!m_pThrdClosed)
+		m_pThrdClosed = AfxBeginThread(CloseErrorWnd, NULL);
+	else
+		m_pThrdClosed->ResumeThread();
 
 #ifdef _DEBUG
 	TRACE("Hour: %d, Mintue: %d Intervel: %d.\n", 
@@ -153,6 +155,9 @@ void CControllPane::OnStop()
 	// 停止 截图
 	TRACE("Stop!\n");
 	m_bIsStart = FALSE;
+
+	if (m_pThrdClosed)
+		m_pThrdClosed->SuspendThread();
 
 	CStatic *txtState = (CStatic *)GetDlgItem(IDC_TEXT_STATE);
 	CString csState;
@@ -219,10 +224,9 @@ void CControllPane::OnTimer(UINT_PTR nIDEvent)
 
 		if (m_tsDiff == 0) {
 			KillTimer(nIDEvent);
-			// 30分钟触发一次
+			// 设置出发频率
 			SetTimer(2, m_nIntervel * 1000, NULL);
 			OnTimer(2);
-			//SetTimer(2, m_nIntervel * 60 * 1000, NULL);
 		}
 		break;
 	case 2 :
@@ -231,16 +235,11 @@ void CControllPane::OnTimer(UINT_PTR nIDEvent)
 		/*
 				获取View, 保存图片。
 		*/
+		::EnterCriticalSection(&m_cs);
 		pWnd = (CMainFrame *)GetParentFrame();
 		pView = (CHTMLViewCapView *)pWnd->GetActiveView();
-		UpdateData(TRUE);
-		for (int i=0; i<m_lstUrl.GetCount(); ++i)
-		{
-			CString csUrl;
-			m_lstUrl.GetText(i, csUrl);
-			lstUrl.AddTail(csUrl);
-		}
 		pView->SaveImages(m_lstHTMLUrl);
+		::LeaveCriticalSection(&m_cs);
 		break;
 	default:
 		ASSERT(FALSE);
@@ -313,7 +312,7 @@ void CControllPane::OnBtnImportExcel()
 		UpdateData(TRUE);
 		m_lstUrl.ResetContent();
 		for (POSITION pos=m_lstHTMLUrl.GetHeadPosition(); 
-			 pos!=m_lstHTMLUrl.GetTailPosition(); 
+			 pos != NULL; 
 			 m_lstHTMLUrl.GetNext(pos))
 		{
 			CHTMLViewCapUrl url = m_lstHTMLUrl.GetAt(pos);

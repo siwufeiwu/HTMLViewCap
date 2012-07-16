@@ -43,6 +43,9 @@ private:
 
 	CList<CHTMLViewCapUrl> m_lstHTMLUrl;
 
+	CWinThread *m_pThrdClosed;
+	CRITICAL_SECTION m_cs;
+
 	// Methods
 	void UpdateTime();
 public:
