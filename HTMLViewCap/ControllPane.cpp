@@ -108,8 +108,9 @@ UINT CloseErrorWnd(LPVOID pParam)
 		{
 			SendMessage(hWnd,   WM_SYSCOMMAND,   SC_CLOSE,   0);
 			hWnd = NULL;
-			TRACE("Closed windows!\n");
+			TRACE("Closed window!\n");
 		}
+		TRACE("Finding window!\n");
 		Sleep(1000);
 	}
     return 0;   // thread completed successfully
@@ -156,8 +157,11 @@ void CControllPane::OnStop()
 	TRACE("Stop!\n");
 	m_bIsStart = FALSE;
 
-	if (m_pThrdClosed)
+	if (m_pThrdClosed) {
+		//m_pThrdClosed->Delete();
+		//m_pThrdClosed = NULL;
 		m_pThrdClosed->SuspendThread();
+	}
 
 	CStatic *txtState = (CStatic *)GetDlgItem(IDC_TEXT_STATE);
 	CString csState;
@@ -167,6 +171,7 @@ void CControllPane::OnStop()
 
 	KillTimer(1);
 	KillTimer(2);
+	KillTimer(3);
 }
 
 void CControllPane::OnUpdateStart(CCmdUI *pCmdUI)
@@ -201,6 +206,7 @@ void CControllPane::OnTimer(UINT_PTR nIDEvent)
 	CList<CString> lstUrl;
 	CStatic *txtState;
 	CString csState;
+	CTime currTime;
 
 #ifdef _DEBUG
 	CString csTime;
@@ -223,8 +229,12 @@ void CControllPane::OnTimer(UINT_PTR nIDEvent)
 		txtState->SetWindowText(csState);
 
 		if (m_tsDiff == 0) {
-			KillTimer(nIDEvent);
-			// 设置出发频率
+			KillTimer(1);
+
+			// 设置触发频率
+			m_nIntervelCount = m_nIntervel;
+			KillTimer(3);
+			SetTimer(3, 1000, NULL);
 			SetTimer(2, m_nIntervel * 1000, NULL);
 			OnTimer(2);
 		}
@@ -240,6 +250,17 @@ void CControllPane::OnTimer(UINT_PTR nIDEvent)
 		pView = (CHTMLViewCapView *)pWnd->GetActiveView();
 		pView->SaveImages(m_lstHTMLUrl);
 		::LeaveCriticalSection(&m_cs);
+		break;
+
+	case 3 :
+		if (m_nIntervelCount == 0)
+			m_nIntervelCount = m_nIntervel;
+
+		m_nIntervelCount--;
+		txtState = (CStatic *)GetDlgItem(IDC_TEXT_STATE);
+		txtState->GetWindowText(csState);
+		csState.Format(_T("状态: 离下次截图还有 %d 秒。"), m_nIntervelCount);
+		txtState->SetWindowText(csState);
 		break;
 	default:
 		ASSERT(FALSE);

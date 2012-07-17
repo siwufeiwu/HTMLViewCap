@@ -140,7 +140,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// 设置 位置和大小
 	POINT p = {300, 300};
-	SIZE  s = {500, 300};
+	SIZE  s = {800, 500};
 	CRect rectPos(p, s);
 
 	// 创建 控制面板

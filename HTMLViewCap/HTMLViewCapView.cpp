@@ -70,7 +70,7 @@ void CHTMLViewCapView::DocumentComplete(LPDISPATCH pDisp, VARIANT* URL)
 	HRESULT hr;
 	IUnknown* pUnkBrowser = NULL;
     IUnknown* pUnkDisp = NULL;
-	IStream* pStream = NULL;
+
 	// 这个 DocumentComplete 事件是否是顶层框架窗口的?
     // 检查 COM 标识: 比较IUnknown 接口指针.
 	hr = m_pBrowserApp->QueryInterface( IID_IUnknown, (void**)&pUnkBrowser );
@@ -192,8 +192,6 @@ void CHTMLViewCapView::SaveImages(CList<CString> &lstUrl)
 
 void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 {
-
-
 	//
 	POSITION pos = NULL;
 	int nWidth  = 1024;
@@ -208,15 +206,15 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 	HRESULT hr;
 	CBitmap *pBM;
 	Bitmap *gdiBMP;
-
+	static DWORD nNum = 0;
 	for (pos = lstUrl.GetHeadPosition();
-		pos != NULL;
-		lstUrl.GetNext(pos))
+		 pos != NULL;
+		 lstUrl.GetNext(pos))
 	{
 
 		nWidth  = lstUrl.GetAt(pos).m_nWidth;
 		nHeight = lstUrl.GetAt(pos).m_nHeight;
-		CString csUrl = lstUrl.GetAt(pos).m_csUrl;
+		CString &csUrl = lstUrl.GetAt(pos).m_csUrl;
 		CBitmapDC destDC(nWidth, nHeight);
 
 		// 创建输出文件路径
@@ -231,12 +229,12 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 		m_pBrowserApp->put_Width(nWidth);
 		m_pBrowserApp->put_Height(nHeight);
 
-		if (m_pBrowserApp->Navigate2(&vUrl, NULL, NULL, NULL, NULL) == S_OK)
+		if (m_pBrowserApp->Navigate2(&vUrl, NULL, NULL, NULL, NULL) == S_OK) {
 				RunModalLoop();
-		else {
+		} else {
 				TRACE(_T("%d Document Navigate Failed!\n"), vUrl);
 				MessageBox(_T("Navi Error"), _T("Error"), MB_OK);
-				//continue ;
+				return ;
 		}
 		// wait for document to load
 		m_pBrowserApp->Refresh();
@@ -265,7 +263,7 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 		pBM = destDC.Close();
 		gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
 
-		csFileName.Format(_T("%u.jpg"), pos);
+		csFileName.Format(_T("%u.jpg"), nNum++);
 		csPath.Append(csFileName);
 		gdiBMP->Save(csPath.GetString(), &m_jpegClsid, NULL);
 	

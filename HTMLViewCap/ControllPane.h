@@ -24,6 +24,7 @@ public:
 private:
 	BOOL m_bIsStart;
 	int m_nIntervel;
+	int m_nIntervelCount;
 	int m_nHour;
 	int m_nMinute;
 	int m_nWidth;
