@@ -192,21 +192,29 @@ void CHTMLViewCapView::SaveImages(CList<CString> &lstUrl)
 
 void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 {
-	//
+	// 
 	POSITION pos = NULL;
-	int nWidth  = 1024;
-	int nHeight = 2048;
+
+	// 浏览器和图片的宽度和高度
+	DWORD nWidth  = 1024;
+	DWORD nHeight = 2048;
+
 	IDispatch *pDoc = NULL;
 	IViewObject *pViewObject = NULL;
 	VARIANT vUrl;
+	//
 	CTime t;
-	CString csTime;
+	CString csTime, csDate;
 	CString csPath;
 	CString csFileName;
 	HRESULT hr;
+	//
 	CBitmap *pBM;
 	Bitmap *gdiBMP;
+	// 用于生成图片的序数
 	static DWORD nNum = 0;
+
+	// 循环遍历所有
 	for (pos = lstUrl.GetHeadPosition();
 		 pos != NULL;
 		 lstUrl.GetNext(pos))
@@ -220,6 +228,7 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 		// 创建输出文件路径
 		t = CTime::GetCurrentTime();
 		csTime = t.Format("\\%H时%M分%S秒-");
+		csDate = t.Format("%Y年%m月%d日   %H时%M分%S秒");
 		csPath = ::theApp.m_csImageDir;
 		csPath.Append(csTime);
 
@@ -258,13 +267,35 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 		if (hr != S_OK) {
 			TRACE(_T("%s OleDraw failed!\n"), vUrl.bstrVal);
 			return ;
-		}
+		} 
+		HFONT hfont;
+		LOGFONT lf;
+		ZeroMemory(&lf, sizeof(lf));
+		lf.lfHeight   =   30;
+		lf.lfWidth    =   20;
+		lf.lfEscapement   =   0;
+		lf.lfOrientation   =   0;
+		lf.lfStrikeOut   =   FALSE;
+		lf.lfCharSet   =   DEFAULT_CHARSET;
+		lf.lfOutPrecision   =   OUT_DEFAULT_PRECIS;  
+		lf.lfClipPrecision   =   CLIP_DEFAULT_PRECIS;  
+		lf.lfQuality   =   ANTIALIASED_QUALITY;
+		lf.lfPitchAndFamily =   VARIABLE_PITCH;
+		lstrcpy(lf.lfFaceName,   _T("微软雅黑"));
+		hfont   =   CreateFontIndirect(&lf);
 
+		destDC.SelectObject(hfont);
+		destDC.SetTextColor(RGB(255, 0, 0));
+		destDC.SetBkMode(TRANSPARENT);
+
+        //Draw
+		TextOut(destDC, nWidth/2 - 300, nHeight/2 - 300, (LPCTSTR)csDate, csDate.GetLength()); 
 		pBM = destDC.Close();
 		gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
 
 		csFileName.Format(_T("%u.jpg"), nNum++);
 		csPath.Append(csFileName);
+		
 		gdiBMP->Save(csPath.GetString(), &m_jpegClsid, NULL);
 	
 		delete gdiBMP;
