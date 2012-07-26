@@ -10,6 +10,15 @@ class CHTMLViewCapView : public CHtmlView
 	ULONG_PTR m_gdiplusToken;
 	CLSID m_jpegClsid;
 
+	// 文档加载前的时间
+	CTime m_tBeforeEnterLoop;
+
+	// 等待文档加载的事件
+	HANDLE m_hDocCompleteEvent;
+
+	// 计算等待时间的线程
+	CWinThread *m_pThrdCalWaitTime;
+
 protected: // 仅从序列化创建
 	CHTMLViewCapView();
 	DECLARE_DYNCREATE(CHTMLViewCapView)
@@ -22,6 +31,8 @@ public:
 public:
 	void SaveImages(CList<CString> &lstUrl);
 	void SaveImages(CList<CHTMLViewCapUrl> &lstUrl);
+
+	int RunModalLoop(DWORD dwFlags = 0);
 
 // 重写
 public:

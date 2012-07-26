@@ -22,14 +22,30 @@ public:
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 private:
+	enum {
+		TIMER_1,
+		TIMER_2,
+		TIMER_3
+	};
+
+	// 状态：用于记录IDC_START按钮是否被按下。
 	BOOL m_bIsStart;
+
+	// 记录间隔
 	int m_nIntervel;
+
+	// 记录间隔计数
 	int m_nIntervelCount;
+
+	//
 	int m_nHour;
 	int m_nMinute;
+
+	// 浏览器和图片的宽高
 	int m_nWidth;
 	int m_nHeight;
 
+	// 记录当前状态的字符串
 	CString m_csState;
 	CString m_csUrl;
 
@@ -42,9 +58,13 @@ private:
 	CTimeSpan m_tsDiff;
 	CTimeSpan m_tsTmSpanDiff;
 
+	// 保存所有URL的链表
 	CList<CHTMLViewCapUrl> m_lstHTMLUrl;
 
+	// 用于关闭脚本错的线程
 	CWinThread *m_pThrdClosed;
+
+	// 临界区 用于防止 截图Timer重复运行
 	CRITICAL_SECTION m_cs;
 
 	// Methods

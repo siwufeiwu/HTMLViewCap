@@ -101,9 +101,14 @@ UINT CloseErrorWnd(LPVOID pParam)
 {
 	HWND hWnd = NULL;
 	BOOL isClosed = FALSE;
-	while (isClosed != TRUE) {
+	while (!isClosed) {
 		hWnd = ::FindWindow(_T("Internet Explorer_TridentDlgFrame"), 
 							_T("Internet Explorer 脚本错误"));
+		if (hWnd == NULL) {
+			hWnd = ::FindWindow(_T("Internet Explorer_TridentDlgFrame"), 
+					_T("脚本错误"));
+		}
+
 		if (hWnd != NULL)
 		{
 			SendMessage(hWnd,   WM_SYSCOMMAND,   SC_CLOSE,   0);
@@ -158,8 +163,6 @@ void CControllPane::OnStop()
 	m_bIsStart = FALSE;
 
 	if (m_pThrdClosed) {
-		//m_pThrdClosed->Delete();
-		//m_pThrdClosed = NULL;
 		m_pThrdClosed->SuspendThread();
 	}
 
@@ -283,18 +286,21 @@ void CControllPane::OnUpdateBtnAddurl(CCmdUI *pCmdUI)
 	pCmdUI->Enable(!m_bIsStart);
 }
 
+/*
+		导入Excel文件
+*/
 void CControllPane::OnBtnImportExcel()
 {
 	BasicExcel e;
 	CFileDialog dlgFile(TRUE);
-	CStringA fileName;
+	CStringA csFileName;
 	if(dlgFile.DoModal() != IDOK)
 	{
 		TRACE(_T("CFileDialog Cancel.\n"));
 		return;
 	}
-	fileName = dlgFile.GetPathName();
-	e.Load(fileName.GetString());
+	csFileName = dlgFile.GetPathName();
+	e.Load(csFileName.GetString());
 
 	BasicExcelWorksheet* URLSheet = e.GetWorksheet("URL");
 
@@ -306,11 +312,17 @@ void CControllPane::OnBtnImportExcel()
 		return ;
 	}
 
-	m_lstHTMLUrl.RemoveAll();
+
 	if (URLSheet) {
+
 		const DWORD nColLen = 3;
 		const DWORD nRowLen = URLSheet->GetTotalRows();
 		TCHAR tcUrl[200];
+
+		/*
+				先清楚原来的URL数据，然后导入新的URL数据。
+		*/
+		m_lstHTMLUrl.RemoveAll();
 		for (DWORD i=1; i<nRowLen; ++i)
 		{
 			BasicExcelCell *cell = URLSheet->Cell(i, 0);
