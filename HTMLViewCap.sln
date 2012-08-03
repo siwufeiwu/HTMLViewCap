@@ -8,6 +8,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HTMLViewCap", "HTMLViewCap\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libBasicExcel", "libBasicExcel\libBasicExcel.vcxproj", "{9B2F963F-2244-478C-A3C7-3A031E205553}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "HTMLViewCapSetup", "HTMLViewCapSetup\HTMLViewCapSetup.vdproj", "{097F14C4-E32F-45F1-87C0-0D29BC38BB7D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -22,6 +24,8 @@ Global
 		{9B2F963F-2244-478C-A3C7-3A031E205553}.Debug|Win32.Build.0 = Debug|Win32
 		{9B2F963F-2244-478C-A3C7-3A031E205553}.Release|Win32.ActiveCfg = Release|Win32
 		{9B2F963F-2244-478C-A3C7-3A031E205553}.Release|Win32.Build.0 = Release|Win32
+		{097F14C4-E32F-45F1-87C0-0D29BC38BB7D}.Debug|Win32.ActiveCfg = Debug
+		{097F14C4-E32F-45F1-87C0-0D29BC38BB7D}.Release|Win32.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
