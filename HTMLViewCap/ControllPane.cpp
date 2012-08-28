@@ -274,10 +274,22 @@ void CControllPane::OnTimer(UINT_PTR nIDEvent)
 void CControllPane::OnBtnAddurl()
 {
 	UpdateData(TRUE);
-	m_lstHTMLUrl.AddTail(CHTMLViewCapUrl(m_csUrl, m_nWidth, m_nHeight));
-	CString url = m_csUrl;
-	url.AppendFormat(_T(" 宽:%d 高:%d "), m_nWidth, m_nHeight);
-	m_lstUrl.AddString(url);
+	std::wsmatch m;
+	std::wregex regexHostname = 
+				std::wregex(L"([[:w:]]+)\.(com|net|org|gov|cc|biz|info|cn)(\.(cn|hk))*");
+	std::wstring strUrl = m_csUrl.GetString();
+	bool found = std::regex_search(strUrl, m, regexHostname);
+
+	if (found) {
+		CHTMLViewCapUrl objUrl = CHTMLViewCapUrl(m_csUrl, m_nWidth, m_nHeight, _T(""));
+		objUrl.m_bHasMediaName = FALSE;
+		m_lstHTMLUrl.AddTail(objUrl);
+		CString csUrl = m_csUrl;
+		csUrl.AppendFormat(_T(" 宽:%d 高:%d "), m_nWidth, m_nHeight);
+		m_lstUrl.AddString(csUrl);
+	} else {
+		::AfxMessageBox(_T("Url 格式不正确!"));
+	}
 	UpdateData(TRUE);
 }
 
@@ -312,10 +324,8 @@ void CControllPane::OnBtnImportExcel()
 		return ;
 	}
 
-
 	if (URLSheet) {
-
-		const DWORD nColLen = 3;
+		//const DWORD nColLen = 3;
 		const DWORD nRowLen = URLSheet->GetTotalRows();
 		TCHAR tcUrl[200];
 
@@ -338,7 +348,10 @@ void CControllPane::OnBtnImportExcel()
 			DWORD nHeight = cell->GetInteger();
 			if (nHeight == 0)
 				nHeight = 2048;
-			m_lstHTMLUrl.AddTail(CHTMLViewCapUrl(csUrl, nWidth, nHeight));
+
+			cell = URLSheet->Cell(i, 3);
+			CString csMediaName  = cell->GetWString();
+			m_lstHTMLUrl.AddTail(CHTMLViewCapUrl(csUrl, nWidth, nHeight, csMediaName));
 		}
 
 		// 更新GUI 

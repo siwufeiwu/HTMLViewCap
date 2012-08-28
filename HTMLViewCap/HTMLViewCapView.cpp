@@ -183,7 +183,6 @@ void CHTMLViewCapView::OnSaveImage()
 	//lstUrl.AddTail(CString(_T("http://178.com")));
 	//lstUrl.AddTail(CString(_T("http://weibo.com")));
 	//lstUrl.AddTail(CString(_T("http://qq.com")));
-
 	//SaveImages(lstUrl);
 }
 
@@ -195,7 +194,6 @@ void CHTMLViewCapView::SaveImages(CList<CString> &lstUrl)
 /*
 		计算等待时间的函数
 */
-
 static UINT calTime(LPVOID /* para */) 
 {
 	return 0;
@@ -214,34 +212,67 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 	IDispatch *pDoc = NULL;
 	IViewObject *pViewObject = NULL;
 	VARIANT vUrl;
+	VARIANT vUrlName;
+
 	//
 	CTime t;
-	CString csTime, csDate;
+	CString csTime, csDate, csMark1;
 	CString csPath;
 	CString csFileName;
 	HRESULT hr;
+
 	//
 	CBitmap *pBM;
 	Bitmap *gdiBMP;
 	// 用于生成图片的序数
 	static DWORD nNum = 0;
 
+	/*
+			创建字体
+	*/
+	HFONT hfont;
+	LOGFONT lf;
+	ZeroMemory(&lf, sizeof(lf));
+	lf.lfHeight   =   0;
+	lf.lfWidth    =   0;
+	lf.lfEscapement   =   0;
+	lf.lfOrientation   =   0;
+	lf.lfStrikeOut   =   FALSE;
+	lf.lfCharSet   =   DEFAULT_CHARSET;
+	lf.lfOutPrecision   =   OUT_DEFAULT_PRECIS;  
+	lf.lfClipPrecision   =   CLIP_DEFAULT_PRECIS;  
+	lf.lfQuality   =   ANTIALIASED_QUALITY;
+	lf.lfPitchAndFamily =   VARIABLE_PITCH;
+	lstrcpy(lf.lfFaceName,   _T("微软雅黑"));
+	hfont   =   CreateFontIndirect(&lf);
+
 	// 循环遍历所有URL
 	for (pos = lstUrl.GetHeadPosition();
-		 pos != NULL;
-		 lstUrl.GetNext(pos))
+		   pos != NULL;
+		   lstUrl.GetNext(pos))
 	{
-
+		// 获取图片和浏览器分辨率
 		nWidth  = lstUrl.GetAt(pos).m_nWidth;
 		nHeight = lstUrl.GetAt(pos).m_nHeight;
 		CString &csUrl = lstUrl.GetAt(pos).m_csUrl;
 		CBitmapDC destDC(nWidth, nHeight);
 
+		// 创建 媒体名称目录
+		csPath = ::theApp.m_csImageDir;
+		csPath.Append(_T("\\"));
+		if (lstUrl.GetAt(pos).m_bHasMediaName) {
+			csPath.Append(lstUrl.GetAt(pos).m_csMediaName);
+		}  else {
+			csPath.Append(lstUrl.GetAt(pos).getMediaNameInUrl());
+		}
+
+		::CreateDirectory(csPath, NULL);
+
 		// 创建输出文件路径
 		t = CTime::GetCurrentTime();
 		csTime = t.Format("\\%H时%M分%S秒-");
-		csDate = t.Format("%Y年%m月%d日   %H时%M分%S秒");
-		csPath = ::theApp.m_csImageDir;
+		csMark1 = t.Format("%H:%M");
+		csDate    = t.Format(" %Y/%m/%d");
 		csPath.Append(csTime);
 
 		vUrl.vt = ::VT_BSTR;
@@ -252,20 +283,13 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 
 		if (m_pBrowserApp->Navigate2(&vUrl, NULL, NULL, NULL, NULL) == S_OK)
 		{
-			//if (m_pThrdCalWaitTime == NULL) 
-			//{
-			//	m_pThrdCalWaitTime = AfxBeginThread(calTime, NULL);
-			//}
-			//::WaitForSingleObject(m_hDocCompleteEvent, 5000);
-			//::ResetEvent(m_hDocCompleteEvent);
 			m_tBeforeEnterLoop = CTime::GetCurrentTime();
 			RunModalLoop();
 		} else {
-				TRACE(_T("%d Document Navigate Failed!\n"), vUrl);
-				MessageBox(_T("Navi Error"), _T("Error"), MB_OK);
-				return ;
+			TRACE(_T("%d Document Navigate Failed!\n"), vUrl);
+			MessageBox(_T("Navi Error"), _T("Error"), MB_OK);
+			return ;
 		}
-
 		TRACE("Begin Cap!\n");
 		// wait for document to load
 		m_pBrowserApp->Refresh();
@@ -290,28 +314,18 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 			TRACE(_T("%s OleDraw failed!\n"), vUrl.bstrVal);
 			return ;
 		} 
-		HFONT hfont;
-		LOGFONT lf;
-		ZeroMemory(&lf, sizeof(lf));
-		lf.lfHeight   =   100;
-		lf.lfWidth    =   25;
-		lf.lfEscapement   =   0;
-		lf.lfOrientation   =   0;
-		lf.lfStrikeOut   =   FALSE;
-		lf.lfCharSet   =   DEFAULT_CHARSET;
-		lf.lfOutPrecision   =   OUT_DEFAULT_PRECIS;  
-		lf.lfClipPrecision   =   CLIP_DEFAULT_PRECIS;  
-		lf.lfQuality   =   ANTIALIASED_QUALITY;
-		lf.lfPitchAndFamily =   VARIABLE_PITCH;
-		lstrcpy(lf.lfFaceName,   _T("微软雅黑"));
-		hfont   =   CreateFontIndirect(&lf);
 
+		/*
+				使用字体
+		*/
 		destDC.SelectObject(hfont);
-		destDC.SetTextColor(RGB(255, 0, 0));
-		destDC.SetBkMode(TRANSPARENT);
+		destDC.SetTextColor(RGB(0, 0, 0));
+		destDC.SetBkColor(RGB(235, 231, 228));
+		//destDC.SetBkMode(TRANSPARENT);
 
-        //Draw
-		TextOut(destDC, nWidth/2 - 300, nHeight/2 - 300, (LPCTSTR)csDate, csDate.GetLength()); 
+        // 输出水印
+		TextOut(destDC, nWidth - 70, nHeight - 100, (LPCTSTR)csMark1, csMark1.GetLength()); 
+		TextOut(destDC, nWidth - 100, nHeight - 70, (LPCTSTR)csDate, csDate.GetLength()); 
 		pBM = destDC.Close();
 		gdiBMP = Bitmap::FromHBITMAP(HBITMAP(pBM->GetSafeHandle()), NULL);
 
@@ -329,6 +343,9 @@ void CHTMLViewCapView::SaveImages(CList<CHTMLViewCapUrl> &lstUrl)
 	}
 }
 
+/*
+			等待5秒
+*/
 int CHTMLViewCapView::RunModalLoop(DWORD dwFlags)
 {
 			ASSERT(::IsWindow(m_hWnd)); // window must be created
