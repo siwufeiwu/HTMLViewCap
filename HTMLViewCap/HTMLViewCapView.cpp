@@ -37,6 +37,8 @@ END_MESSAGE_MAP()
 
 CHTMLViewCapView::CHTMLViewCapView()
 {
+	m_wating_time_max = 10;
+
 	// Initialize GDI+.
 	GdiplusStartupInput gdiplusStartupInput;
 	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
@@ -436,7 +438,7 @@ int CHTMLViewCapView::RunModalLoop(DWORD dwFlags)
 					tEndLoop = CTime::GetCurrentTime();
 					span =  tEndLoop - m_tBeforeEnterLoop;
 					TRACE("Span : %d .\n", span.GetTotalSeconds());
-					if (span.GetTotalSeconds() >= 5)
+					if (span.GetTotalSeconds() >= m_wating_time_max)
 					{
 						bQuit = TRUE;
 					}

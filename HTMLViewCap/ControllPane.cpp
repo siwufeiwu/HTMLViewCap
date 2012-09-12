@@ -31,6 +31,9 @@ LRESULT CControllPane::HandleInitDialog(WPARAM wParam, LPARAM lParam)
 {
 	CPaneDialog::HandleInitDialog(wParam, lParam);
 
+	CTime currTime = CTime::GetCurrentTime();
+	CString csSelect;
+
 	/*
 			初始化 URL列表框
 	*/
@@ -48,7 +51,10 @@ LRESULT CControllPane::HandleInitDialog(WPARAM wParam, LPARAM lParam)
 		_stprintf_s(tcBuf, _T("%d"), i);
 		cbHours->AddString(tcBuf);
 	}
-	cbHours->SelectString(0, _T("0"));
+	int hour = currTime.GetHour();
+	csSelect.Format(_T("%d"), hour);
+	cbHours->SelectString(0,  csSelect);
+
 	/*
 			分钟 ComboBox
 	*/
@@ -58,7 +64,9 @@ LRESULT CControllPane::HandleInitDialog(WPARAM wParam, LPARAM lParam)
 		_stprintf_s(tcBuf, _T("%d"), i);
 		cbMins->AddString(tcBuf);
 	}
-	cbMins->SelectString(0, _T("0"));
+	int minute = currTime.GetMinute();
+	csSelect.Format(_T("%d"), minute);
+	cbMins->SelectString(0, csSelect);
 
 	/*
 			状态 Static

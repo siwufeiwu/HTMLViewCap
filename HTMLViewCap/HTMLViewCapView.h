@@ -7,6 +7,9 @@
 
 class CHTMLViewCapView : public CHtmlView
 {
+	// 等待文档最长加载时间 单位:秒
+	int m_wating_time_max;
+
 	ULONG_PTR m_gdiplusToken;
 	CLSID m_jpegClsid;
 
@@ -59,6 +62,7 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	DECLARE_MESSAGE_MAP()
+
 public:
 	afx_msg void OnSaveImage();
 };
